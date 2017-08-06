@@ -1,6 +1,7 @@
 package com.example.hatem.Game;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,11 +9,16 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.PopupWindow;
+
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
@@ -25,7 +31,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     private long smokeStartTime;
     private long missileStartTime;
-    private MainThread thread;
+    public MainThread thread;
     private Background bg;
     private PlayerGameObject player;
     private ArrayList<SmokePuff> smoke;
@@ -39,6 +45,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private boolean botDown = true;
     private boolean newGameCreated;
 
+
     //increase to slow down difficulty progression, decrease to speed up difficulty progression
     private int progressDenom = 20;
 
@@ -46,39 +53,22 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private long startReset;
     private boolean reset;
     private boolean disappear;
+    private boolean hasDied;
     private boolean started;
     private int bestScore;
 
     public GamePanel(Context context) {
         super(context);
         this.context = context;
+
+        // Temporary placement
+        hasDied = false;
+
         //add the callback to the surfaceholder to intercept events
         getHolder().addCallback(this);
 
         //make gamePanel focusable so it can handle events
         setFocusable(true);
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height){}
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder){
-        boolean retry = true;
-        int counter = 0;
-        while(retry && counter<1000) {
-            counter++;
-            try{thread.setRunning(false);
-                thread.join();
-                retry = false;
-                thread = null;
-
-            }catch(InterruptedException e){e.printStackTrace();}
-        }
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder){
 
         bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.grassbg1));
         player = new PlayerGameObject(BitmapFactory.decodeResource(getResources(), R.drawable.helicopter), 65, 25, 3);
@@ -90,9 +80,53 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         missileStartTime = System.nanoTime();
 
         thread = new MainThread(getHolder(), this);
-        //we can safely start the game loop
         thread.setRunning(true);
         thread.start();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height){}
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder){
+        boolean retry = true;
+        int counter = 0;
+
+        synchronized (thread) {
+            thread.mPause = true;
+        }
+        /*while(retry && counter<1000) {
+            counter++;
+            try{thread.setRunning(false);
+                thread.join();
+                retry = false;
+                thread = null;
+
+            }catch(InterruptedException e){e.printStackTrace();}
+        }*/
+        //thread = null;
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder){
+
+        /*bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.grassbg1));
+        player = new PlayerGameObject(BitmapFactory.decodeResource(getResources(), R.drawable.helicopter), 65, 25, 3);
+        smoke = new ArrayList<SmokePuff>();
+        missiles = new ArrayList<Missile>();
+        topborder = new ArrayList<TopBorder>();
+        botborder = new ArrayList<BottomBorder>();
+        smokeStartTime=  System.nanoTime();
+        missileStartTime = System.nanoTime();*/
+        synchronized (thread) {
+            thread.mPause = false;
+           // thread.mPauseLock.notifyAll();
+            thread.notifyAll();
+        }
+
+        //thread = new MainThread(getHolder(), this);
+
+        //we can safely start the game loop
     }
 
     @Override
@@ -143,14 +177,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
             //check bottom border collision
             for(int i = 0; i<botborder.size(); i++) {
-                if(collided(botborder.get(i), player))
+                if(collided(botborder.get(i), player)){
+                    hasDied = true;
                     player.setPlaying(false);
+                }
+
             }
 
             //check top border collision
             for(int i = 0; i <topborder.size(); i++) {
-                if(collided(topborder.get(i),player))
+                if(collided(topborder.get(i),player)) {
+                    hasDied = true;
                     player.setPlaying(false);
+                }
             }
 
             //update top border
@@ -182,6 +221,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 if(collided(missiles.get(i),player)) {
                     missiles.remove(i);
                     player.setPlaying(false);
+                    hasDied = true;
                     break;
                 }
                 //remove missile if it is way off the screen
@@ -405,5 +445,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             canvas.drawText("PRESS AND HOLD TO GO UP", WIDTH/2-50, HEIGHT/2 + 20, paint1);
             canvas.drawText("RELEASE TO GO DOWN", WIDTH/2-50, HEIGHT/2 + 40, paint1);
         }
+
+        /*if(hasDied) {
+            Game game = (Game)context;
+            game.doesThisWork();
+        }*/
     }
 }

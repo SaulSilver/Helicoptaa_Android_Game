@@ -10,7 +10,7 @@ import android.graphics.Canvas;
 public class PlayerGameObject extends AbstractGameObject{
     private Bitmap spriteSheet;
     private int score;
-     private boolean up;
+    private boolean up;
     private boolean playing;
     private Animation animation = new Animation();
     private long startTime;
@@ -56,7 +56,7 @@ public class PlayerGameObject extends AbstractGameObject{
         if (dy < -14)
             dy = -14;
 
-        y += dy*2;
+        y += dy*1.1;
     }
 
     public void draw(Canvas canvas){
