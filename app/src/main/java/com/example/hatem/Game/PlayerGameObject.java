@@ -56,7 +56,7 @@ public class PlayerGameObject extends AbstractGameObject{
         if (dy < -14)
             dy = -14;
 
-        y += dy*1.1;
+        y += dy*1;
     }
 
     public void draw(Canvas canvas){

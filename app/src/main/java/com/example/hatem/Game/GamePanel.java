@@ -13,7 +13,16 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
@@ -410,9 +419,50 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             canvas.drawText("RELEASE TO GO DOWN", WIDTH / 2 - 50, HEIGHT / 2 + 40, paint1);
         }
 
-        /*if(hasDied) {
-            Game game = (Game)context;
-            game.doesThisWork();
-        }*/
+        if (hasDied) {
+            updateScoreToListOfScores(player.getScore() * 3);
+            onEndGame();
+        }
+    }
+
+    /*
+     * Pauses the thread and calls the end game popup.
+     * Resets player life status afterwards in order to resume the game to its normal state
+     */
+    private void onEndGame() {
+        thread.onPause();
+        Game game = (Game) context;
+        int score = player.getScore() * 3;
+        game.onEndGamePopup(score);
+        // Make sure hasDied is reset so that the game continues and escapes the if statement.
+        hasDied = false;
+    }
+
+
+    /*
+     * Gets (if present) a PlayerScore list-like json object from shared prefs.
+     * Converts said object to an ArrayList and adds the new player score.
+     * The list is then converted back to json and stored in the shared prefs.
+     */
+    private void updateScoreToListOfScores(int playerScore) {
+        Gson gson = new Gson();
+        List scoresFromSharedPreferences;
+        SharedPreferences sharedPref = context.getSharedPreferences("SharedPrefs", Context.MODE_PRIVATE);
+        String jsonPreferences = sharedPref.getString("PlayerScores", "");
+
+        Type type = new TypeToken<List>() {}.getType();
+        scoresFromSharedPreferences = gson.fromJson(jsonPreferences, type);
+
+        if (scoresFromSharedPreferences == null) {
+            scoresFromSharedPreferences  = new ArrayList();
+        }
+
+        scoresFromSharedPreferences.add(playerScore);
+
+        String jsonScoresFromSharedPreferences = gson.toJson(scoresFromSharedPreferences);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("PlayerScores", jsonScoresFromSharedPreferences);
+        editor.commit();
     }
 }
