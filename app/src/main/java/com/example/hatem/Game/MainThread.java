@@ -16,7 +16,7 @@ public class MainThread extends Thread {
     private boolean running;
     public static Canvas canvas;
     public Object mPauseLock;
-    public boolean mPause;
+    public boolean mPaused;
 
 
     public static final int TO_ONE_MILLISECOND = 1000000;
@@ -26,7 +26,7 @@ public class MainThread extends Thread {
         this.surfaceHolder = surfaceHolder;
         this.gamePanel = gamePanel;
         this.mPauseLock = new Object();
-        mPause = false;
+        mPaused = false;
     }
 
     @Override
@@ -38,18 +38,17 @@ public class MainThread extends Thread {
         int frameCount = 0;
         long targetTime = 1000/FPS;         //time for each gameloop
 
-        while(running){
+            while(running){
 
-            synchronized (this) {
-                while (mPause) {
-                    try {
-                        //mPauseLock.wait();
-                        this.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                synchronized (mPauseLock) {
+                    while (mPaused) {
+                        try {
+                            mPauseLock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
 
             startTime = System.nanoTime();
             canvas = null;
@@ -94,5 +93,18 @@ public class MainThread extends Thread {
 
     public void setRunning(boolean start){
         running = start;
+    }
+
+    public void onPause() {
+        synchronized (mPauseLock) {
+            mPaused = true;
+        }
+    }
+
+    public void onResume() {
+        synchronized (mPauseLock) {
+            mPaused = false;
+            mPauseLock.notifyAll();
+        }
     }
 }
