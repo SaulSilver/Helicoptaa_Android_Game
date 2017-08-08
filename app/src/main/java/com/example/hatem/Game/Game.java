@@ -2,16 +2,15 @@ package com.example.hatem.Game;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.PopupWindow;
 
 public class Game extends Activity {
 
     private static GamePanel gamePanel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +24,7 @@ public class Game extends Activity {
 
         gamePanel = new GamePanel(this);
         setContentView(gamePanel);
+
     }
 
     @Override

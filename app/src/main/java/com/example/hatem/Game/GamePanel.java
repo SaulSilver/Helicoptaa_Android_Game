@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -40,6 +41,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private boolean botDown = true;
     private boolean newGameCreated;
 
+    //Sounds
+    private MediaPlayer backgroundSound;
+    private MediaPlayer helicopterSound;
+    private MediaPlayer crashSound;
 
     //increase to slow down difficulty progression, decrease to speed up difficulty progression
     private int progressDenom = 20;
@@ -56,7 +61,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         super(context);
         this.context = context;
 
-        // Temporary placement
+        //TODO: Do we need this boolean anymore. Temporary placement
         hasDied = false;
 
         //add the callback to the surfaceholder to intercept events
@@ -86,9 +91,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        boolean retry = true;
-        int counter = 0;
-
+        //Pauses the music
+        backgroundSound.release();
+        helicopterSound.release();
+        crashSound.release();
         synchronized (thread) {
             thread.onPause();
         }
@@ -96,14 +102,31 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        //Start the background music
+        backgroundSound = MediaPlayer.create(context, R.raw.background_music);
+        backgroundSound.setLooping(true);
+        backgroundSound.start();
+        //Set up the sound for the Helicopter sound
+        helicopterSound = MediaPlayer.create(context, R.raw.helicopter_sound);
+        helicopterSound.setLooping(true);
+        //Set up the sound for the Crash sound
+        crashSound = MediaPlayer.create(context, R.raw.crash_sound);
+        crashSound.setLooping(false);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            //Play the click sound
+            MediaPlayer clickSound = MediaPlayer.create(context, R.raw.button_press);
+            clickSound.setLooping(false);
+            clickSound.start();
+
             if (!player.isPlaying() && newGameCreated && reset) {
                 player.setPlaying(true);
                 player.setUp(true);
+                //Play the helicopter sound
+                helicopterSound.start();
             }
             if (player.isPlaying()) {
                 if (!started)
@@ -138,7 +161,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             //calculate the threshold of height the border can have based on the score
             //max and min border heart are updated, and the border switched direction when either max or
             //min is met
-
             maxBorderHeight = 30 + player.getScore() / progressDenom;
             //cap max border height so that borders can only take up a total of 1/2 the screen
             if (maxBorderHeight > HEIGHT / 4) maxBorderHeight = HEIGHT / 4;
@@ -150,7 +172,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                     hasDied = true;
                     player.setPlaying(false);
                 }
-
             }
 
             //check top border collision
@@ -221,7 +242,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion), player.getX(),
                         player.getY() - 30, 100, 100, 25);
             }
-
             explosion.update();
             long resetElapsed = (System.nanoTime() - startReset) / 1000000;
 
@@ -231,6 +251,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public boolean collided(AbstractGameObject a, AbstractGameObject b) {
+        if (Rect.intersects(a.getRectangle(), b.getRectangle())) {
+            //Add sound effects
+            if (helicopterSound.isPlaying())
+                helicopterSound.pause();
+            crashSound.start();         //Play the crash sound
+        }
         return Rect.intersects(a.getRectangle(), b.getRectangle());
     }
 
@@ -316,7 +342,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             //if border is moving off screen, remove it and add a corresponding new one
             if (botborder.get(i).getX() < -20) {
                 botborder.remove(i);
-
                 //determine if border will be moving up or down
                 if (botborder.get(botborder.size() - 1).getY() <= HEIGHT - maxBorderHeight)
                     botDown = true;
