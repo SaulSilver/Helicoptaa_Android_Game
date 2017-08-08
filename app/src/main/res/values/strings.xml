@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Helicopty</string>
+    
+    
+    <!-- End Game Popup Strings -->
+    <string name="End_Game_PopUp_Game_Over">Game Over!</string>
+    <string name="End_Game_PopUp_Share">Share your score with your friends!</string>
+    <string name="End_Game_PopUp_Button_Resume">Resume</string>
+    <string name="End_Game_PopUp_HighScoreListView_HeadLine">High scores:</string>
 </resources>
