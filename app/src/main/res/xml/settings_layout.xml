@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="true"
+        android:key="background_music_chooser"
+        android:title="Background Music" />
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="true"
+        android:key="sound_effects_chooser"
+        android:title="Sound Effects" />
+    <ListPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="0"
+        android:entries="@array/array_game_difficulty"
+        android:entryValues="@array/array_game_difficulty"
+        android:key="game_difficulty_chooser"
+        android:title="Game Difficulty" />
+</PreferenceScreen>

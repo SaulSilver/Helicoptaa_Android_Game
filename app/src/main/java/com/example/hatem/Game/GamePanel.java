@@ -50,9 +50,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private MediaPlayer backgroundSound;
     private MediaPlayer helicopterSound;
     private MediaPlayer crashSound;
+    private boolean playBckgrndMusic;
+    private boolean playSoundEffects;
 
     //increase to slow down difficulty progression, decrease to speed up difficulty progression
-    private int progressDenom = 20;
+    private int progressDenom = 40;
 
     private Explosion explosion;
     private long startReset;
@@ -73,6 +75,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
         //make gamePanel focusable so it can handle events
         setFocusable(true);
+
+        //Set values from the Settings
+        updateSettings();
 
         bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.grassbg1));
         player = new PlayerGameObject(BitmapFactory.decodeResource(getResources(), R.drawable.helicopter), 65, 25, 3);
@@ -109,7 +114,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         //Start the background music
         backgroundSound = MediaPlayer.create(context, R.raw.background_music);
         backgroundSound.setLooping(true);
-        backgroundSound.start();
+        if (playBckgrndMusic)
+            backgroundSound.start();
         //Set up the sound for the Helicopter sound
         helicopterSound = MediaPlayer.create(context, R.raw.helicopter_sound);
         helicopterSound.setLooping(true);
@@ -122,15 +128,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             //Play the click sound
-            MediaPlayer clickSound = MediaPlayer.create(context, R.raw.button_press);
-            clickSound.setLooping(false);
-            clickSound.start();
+            if (playSoundEffects) {
+                MediaPlayer clickSound = MediaPlayer.create(context, R.raw.button_press);
+                clickSound.setLooping(false);
+                clickSound.start();
+            }
 
             if (!player.isPlaying() && newGameCreated && reset) {
                 player.setPlaying(true);
                 player.setUp(true);
                 //Play the helicopter sound
-                helicopterSound.start();
+                if (playSoundEffects)
+                    helicopterSound.start();
             }
             if (player.isPlaying()) {
                 if (!started)
@@ -259,7 +268,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             //Add sound effects
             if (helicopterSound.isPlaying())
                 helicopterSound.pause();
-            crashSound.start();         //Play the crash sound
+            if (playSoundEffects)
+                crashSound.start();         //Play the crash sound
         }
         return Rect.intersects(a.getRectangle(), b.getRectangle());
     }
@@ -484,5 +494,35 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("PlayerScores", jsonScoresFromSharedPreferences);
         editor.commit();
+    }
+
+    /**
+     * Update the gameplay according to the user's preference of the settings
+     */
+    public void updateSettings() {
+        //Getting settings properties from shared preferences
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean backgroundMusic = sharedPrefs.getBoolean("background_music_chooser", true);           //false is the default value
+        boolean soundEffects = sharedPrefs.getBoolean("sound_effects_chooser", true);
+        String gameDifficulty = sharedPrefs.getString("game_difficulty_chooser", "Easy");
+
+        //For background music
+        playBckgrndMusic = backgroundMusic;
+
+        //For Sound Effects
+        playSoundEffects = soundEffects;
+
+        //For Game Difficulty
+        switch (gameDifficulty) {
+            case "Easy":
+                progressDenom = 20;
+                break;
+            case "Medium":
+                progressDenom = 50;
+                break;
+            case "Hard":
+                progressDenom = 100;
+                break;
+        }
     }
 }

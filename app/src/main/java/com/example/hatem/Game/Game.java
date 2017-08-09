@@ -28,6 +28,7 @@ public class Game extends Activity {
     // End game popup specific UI components
     private Button resumeButton;
     private Button shareButton;
+    private Button settingsButton;
     private ListView highScoreListView;
 
     @Override
@@ -62,15 +63,7 @@ public class Game extends Activity {
                 dialog.setContentView(R.layout.end_game_popup);
                 dialog.show();
 
-                // Set up resume button
-                resumeButton = (Button) dialog.findViewById(R.id.end_game_popup_resume_button);
-                resumeButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        gamePanel.thread.onResume();
-                    }
-                });
+                //Setup the share button
                 shareButton = (Button) dialog.findViewById(R.id.end_game_popup_share);
                 shareButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -81,10 +74,37 @@ public class Game extends Activity {
                         startActivity(Intent.createChooser(msgIntent, "Send a message via.."));
                     }
                 });
+                //Setup the settings button
+                settingsButton = (Button) dialog.findViewById(R.id.end_game_popup_settings_btn);
+                settingsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent settingsIntent = new Intent(getBaseContext(), SettingsActivity.class);
+                        startActivityForResult(settingsIntent, 1);
+                    }
+                });
+
+                // Set up resume button
+                resumeButton = (Button) dialog.findViewById(R.id.end_game_popup_resume_button);
+                resumeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                        gamePanel.thread.onResume();
+                    }
+                });
                 highScoreListView = (ListView) dialog.findViewById(R.id.end_game_popup_highscore_listview);
                 highScoreListView.setAdapter(getScoresFromSharedPreferences());
             }
         });
+    }
+
+    @Override
+    public void  onActivityResult(int requestCode, int resultCode, Intent result) {
+        switch (requestCode) {
+            case 1:     //Back from the Settings activity
+                gamePanel.updateSettings();
+        }
     }
 
     private ArrayAdapter<String> getScoresFromSharedPreferences() {
@@ -100,8 +120,8 @@ public class Game extends Activity {
         for (int i = 0; i < playerScores.size(); i++) {
             if(i > 9)
                 break;
-            playerScoreList.add(playerScores.get(i));
-            System.out.println("Player scores are saved: " + playerScores.get(i));
+            int score = ((Double) playerScores.get(i)).intValue();      //Changing double value to int for better look
+            playerScoreList.add(score);
         }
         Collections.sort(playerScoreList, Collections.reverseOrder());
         ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerScoreList);
