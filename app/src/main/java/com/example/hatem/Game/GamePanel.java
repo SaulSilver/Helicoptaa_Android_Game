@@ -17,10 +17,6 @@ import android.view.SurfaceView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +66,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         super(context);
         this.context = context;
 
-        //TODO: Do we need this boolean anymore. Temporary placement
         hasDied = false;
 
         //add the callback to the surfaceholder to intercept events

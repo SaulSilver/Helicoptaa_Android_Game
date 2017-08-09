@@ -77,7 +77,7 @@ public class Game extends Activity {
                     public void onClick(View v) {
                         Intent msgIntent = new Intent(Intent.ACTION_SEND);
                         msgIntent.setType("text/plain");
-                        msgIntent.putExtra(Intent.EXTRA_TEXT, "Hey i just won in this sutpid fucking game  " + playerScore);
+                        msgIntent.putExtra(Intent.EXTRA_TEXT, "Hey, I just won in this game  " + playerScore);
                         startActivity(Intent.createChooser(msgIntent, "Send a message via.."));
                     }
                 });
