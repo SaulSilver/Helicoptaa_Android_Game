@@ -63,6 +63,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private boolean hasDied;
     private boolean started;
     private int bestScore;
+    private boolean pauseOccured;
+    private boolean hasBeenCreated;
 
     public GamePanel(Context context) {
         super(context);
@@ -88,6 +90,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         smokeStartTime = System.nanoTime();
         missileStartTime = System.nanoTime();
 
+        pauseOccured = false;
+
         thread = new MainThread(getHolder(), this);
         thread.setRunning(true);
         thread.start();
@@ -95,18 +99,29 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        thread.onResume();
+        if (pauseOccured && player.isPlaying()) {
+            Game game = (Game) context;
+            game.onPausePopup();
+            pauseOccured = false;
+        }
+        else {
+            thread.onResume();
+        }
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         //Pauses the music
-        backgroundSound.release();
-        helicopterSound.release();
-        crashSound.release();
+       // backgroundSound.release();
+        backgroundSound.pause();
+       // helicopterSound.release();
+        helicopterSound.pause();
+       // crashSound.release();
+        crashSound.pause();
         synchronized (thread) {
             thread.onPause();
         }
+        pauseOccured = true;
     }
 
     @Override
@@ -122,6 +137,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         //Set up the sound for the Crash sound
         crashSound = MediaPlayer.create(context, R.raw.crash_sound);
         crashSound.setLooping(false);
+        hasBeenCreated = true;
     }
 
     @Override

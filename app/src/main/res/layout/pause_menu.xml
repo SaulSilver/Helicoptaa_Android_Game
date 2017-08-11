@@ -10,8 +10,9 @@
     tools:context="com.example.hatem.Game.Game"
     android:id="@+id/pause_settings_menu">
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="Resume"
+        android:id="@+id/pause_menu_resume_button"/>
 </RelativeLayout>

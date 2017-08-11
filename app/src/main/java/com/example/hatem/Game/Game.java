@@ -29,6 +29,7 @@ public class Game extends Activity {
     private Button resumeButton;
     private Button shareButton;
     private Button settingsButton;
+    private Button pauseResumeButton;
     private ListView highScoreListView;
 
     @Override
@@ -55,12 +56,18 @@ public class Game extends Activity {
         super.onResume();
     }
 
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
     public void onEndGamePopup(final int playerScore) {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 final Dialog dialog = new Dialog(Game.this);
                 dialog.setContentView(R.layout.end_game_popup);
+                dialog.setCancelable(false);
                 dialog.show();
 
                 //Setup the share button
@@ -95,6 +102,28 @@ public class Game extends Activity {
                 });
                 highScoreListView = (ListView) dialog.findViewById(R.id.end_game_popup_highscore_listview);
                 highScoreListView.setAdapter(getScoresFromSharedPreferences());
+            }
+        });
+    }
+
+    public void onPausePopup() {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final Dialog dialog = new Dialog(Game.this);
+                dialog.setContentView(R.layout.pause_menu);
+                dialog.setCancelable(false);
+                dialog.show();
+
+                pauseResumeButton = (Button) dialog.findViewById(R.id.pause_menu_resume_button);
+                pauseResumeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                        gamePanel.thread.onResume();
+                    }
+                });
+
             }
         });
     }
