@@ -112,11 +112,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         //Pauses the music
-       // backgroundSound.release();
         backgroundSound.pause();
-       // helicopterSound.release();
         helicopterSound.pause();
-       // crashSound.release();
         crashSound.pause();
         synchronized (thread) {
             thread.onPause();
@@ -170,6 +167,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    public void resumeThread() {
+        if (player.isPlaying() && playSoundEffects)
+            helicopterSound.start();
+        thread.onResume();
     }
 
     public void update() {
@@ -537,7 +540,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 progressDenom = 50;
                 break;
             case "Hard":
-                progressDenom = 100;
+                progressDenom = 200;
                 break;
         }
     }

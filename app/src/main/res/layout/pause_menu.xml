@@ -10,9 +10,38 @@
     tools:context="com.example.hatem.Game.Game"
     android:id="@+id/pause_settings_menu">
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Resume"
-        android:id="@+id/pause_menu_resume_button"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="184dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="60dp"
+            android:text="Game Paused"
+            android:textSize="24dp" />
+
+        <Button
+            android:id="@+id/pause_menu_resume_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Resume" />
+
+        <Button
+            android:id="@+id/pause_menu_settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Settings" />
+
+        <Button
+            android:id="@+id/pause_menu_exit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EXIT" />
+    </LinearLayout>
+
 </RelativeLayout>

@@ -30,6 +30,8 @@ public class Game extends Activity {
     private Button shareButton;
     private Button settingsButton;
     private Button pauseResumeButton;
+    private Button pauseSettingsButton;
+    private Button pauseExitButton;
     private ListView highScoreListView;
 
     @Override
@@ -77,7 +79,7 @@ public class Game extends Activity {
                     public void onClick(View v) {
                         Intent msgIntent = new Intent(Intent.ACTION_SEND);
                         msgIntent.setType("text/plain");
-                        msgIntent.putExtra(Intent.EXTRA_TEXT, "Hey, I just won in this game  " + playerScore);
+                        msgIntent.putExtra(Intent.EXTRA_TEXT, "Hey, I just won in the Helicopty game with score  " + playerScore + "\nTry your best to beat my score, bitch!");
                         startActivity(Intent.createChooser(msgIntent, "Send a message via.."));
                     }
                 });
@@ -97,7 +99,7 @@ public class Game extends Activity {
                     @Override
                     public void onClick(View v) {
                         dialog.dismiss();
-                        gamePanel.thread.onResume();
+                        gamePanel.resumeThread();
                     }
                 });
                 highScoreListView = (ListView) dialog.findViewById(R.id.end_game_popup_highscore_listview);
@@ -115,15 +117,36 @@ public class Game extends Activity {
                 dialog.setCancelable(false);
                 dialog.show();
 
+                //Resume Game
                 pauseResumeButton = (Button) dialog.findViewById(R.id.pause_menu_resume_button);
                 pauseResumeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         dialog.dismiss();
-                        gamePanel.thread.onResume();
+                        gamePanel.resumeThread();
                     }
                 });
 
+                //Go to Settings
+                pauseSettingsButton = (Button) dialog.findViewById(R.id.pause_menu_settings_button);
+                pauseSettingsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                        Intent settingsIntent = new Intent(getBaseContext(), SettingsActivity.class);
+                        startActivityForResult(settingsIntent, 1);
+                    }
+                });
+
+                //Exit application
+                pauseExitButton = (Button) dialog.findViewById(R.id.pause_menu_exit_button);
+                pauseExitButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                        System.exit(0);
+                    }
+                });
             }
         });
     }
