@@ -70,6 +70,10 @@ public class Game extends Activity {
                 final Dialog dialog = new Dialog(Game.this);
                 dialog.setContentView(R.layout.end_game_popup);
                 dialog.setCancelable(false);
+
+                highScoreListView = (ListView) dialog.findViewById(R.id.end_game_popup_highscore_listview);
+                highScoreListView.setAdapter(getScoresFromSharedPreferences());
+
                 dialog.show();
 
                 //Setup the share button
@@ -79,7 +83,7 @@ public class Game extends Activity {
                     public void onClick(View v) {
                         Intent msgIntent = new Intent(Intent.ACTION_SEND);
                         msgIntent.setType("text/plain");
-                        msgIntent.putExtra(Intent.EXTRA_TEXT, "Hey, I just won in the Helicopty game with score  " + playerScore + "\nTry your best to beat my score, bitch!");
+                        msgIntent.putExtra(Intent.EXTRA_TEXT, "Hey, I just won in the Helicopty game with score  " + playerScore + "\nTry your best to beat my score!");
                         startActivity(Intent.createChooser(msgIntent, "Send a message via.."));
                     }
                 });
@@ -102,8 +106,7 @@ public class Game extends Activity {
                         gamePanel.resumeThread();
                     }
                 });
-                highScoreListView = (ListView) dialog.findViewById(R.id.end_game_popup_highscore_listview);
-                highScoreListView.setAdapter(getScoresFromSharedPreferences());
+
             }
         });
     }
@@ -170,13 +173,12 @@ public class Game extends Activity {
         List playerScores = scoresFromSharedPreferences;
         ArrayList playerScoreList = new ArrayList();
         for (int i = 0; i < playerScores.size(); i++) {
-            if(i > 9)
-                break;
             int score = ((Double) playerScores.get(i)).intValue();      //Changing double value to int for better look
             playerScoreList.add(score);
         }
         Collections.sort(playerScoreList, Collections.reverseOrder());
-        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerScoreList);
+
+        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerScoreList.subList(0, 9));
         return ad;
     }
 }
